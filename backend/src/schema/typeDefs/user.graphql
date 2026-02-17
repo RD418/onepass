@@ -1,0 +1,51 @@
+type User {
+  uid: ID!
+  email: String!
+  displayName: String
+  bio: String
+  avatarUrl: String
+  coverUrl: String
+  phoneE164: String
+  country: String
+  status: UserStatus!
+  showEmail: Boolean!
+  analyticsEnabled: Boolean!
+  createdAt: DateTime!
+  lastLoginAt: DateTime
+  
+  # Relations
+  organizations: [Organization!]!
+  tickets: [Ticket!]!
+  favoriteEvents: [Event!]!
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+  DELETED
+}
+
+input UpdateUserInput {
+  displayName: String
+  bio: String
+  avatarUrl: String
+  coverUrl: String
+  phoneE164: String
+  country: String
+  showEmail: Boolean
+  analyticsEnabled: Boolean
+}
+
+extend type Query {
+  me: User
+  user(uid: ID!): User
+  searchUsers(query: String!, limit: Int): [User!]!
+}
+
+extend type Mutation {
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser: Boolean!
+  addFavoriteEvent(eventId: ID!): User!
+  removeFavoriteEvent(eventId: ID!): User!
+}
+

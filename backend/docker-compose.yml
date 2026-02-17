@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: onepass_postgres
+    environment:
+      POSTGRES_DB: onepass
+      POSTGRES_USER: onepass_user
+      POSTGRES_PASSWORD: onepass_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onepass_user -d onepass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+

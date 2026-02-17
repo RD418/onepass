@@ -1,0 +1,243 @@
+# Test Queries for OnePass GraphQL API
+# Copy and paste these into Apollo Studio at http://localhost:4000/graphql
+
+# ============================================
+# BASIC QUERIES (No Authentication Required)
+# ============================================
+
+# Test 1: Simple health check
+query HealthCheck {
+  _empty
+}
+
+# Test 2: Get all events (paginated)
+query GetEvents {
+  events(first: 5) {
+    edges {
+      node {
+        id
+        title
+        description
+        status
+        organizerName
+        startTime
+        endTime
+        ticketsRemaining
+        capacity
+        currency
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+  }
+}
+
+# Test 3: Get featured events
+query GetFeaturedEvents {
+  featuredEvents {
+    id
+    title
+    description
+    organizerName
+    startTime
+    ticketsRemaining
+    lowestPrice
+    isSoldOut
+    isPublished
+  }
+}
+
+# Test 4: Get a specific event by ID
+# Replace EVENT_ID with an actual event ID from your database
+query GetEvent {
+  event(id: "EVENT_ID") {
+    id
+    title
+    description
+    organizer {
+      id
+      name
+    }
+    location {
+      name
+      latitude
+      longitude
+    }
+    pricingTiers {
+      id
+      name
+      price
+      remaining
+    }
+    images
+    tags
+  }
+}
+
+# Test 5: Search organizations
+query SearchOrganizations {
+  searchOrganizations(query: "test", limit: 10) {
+    id
+    name
+    description
+    status
+    verified
+  }
+}
+
+# ============================================
+# AUTHENTICATED QUERIES
+# ============================================
+# For these queries, you need to:
+# 1. Get a Firebase token from your Android app
+# 2. In Apollo Studio, go to the "Headers" tab
+# 3. Add: { "Authorization": "Bearer YOUR_TOKEN_HERE" }
+
+# Test 6: Get current user profile
+query GetMe {
+  me {
+    uid
+    email
+    displayName
+    bio
+    avatarUrl
+    status
+    createdAt
+  }
+}
+
+# Test 7: Get user's tickets
+query GetMyTickets {
+  myTickets {
+    id
+    event {
+      id
+      title
+      startTime
+    }
+    state
+    purchasePrice
+    issuedAt
+  }
+}
+
+# Test 8: Get user's organizations
+query GetMyOrganizations {
+  myOrganizations {
+    id
+    name
+    description
+    role
+    status
+  }
+}
+
+# ============================================
+# MUTATIONS (Require Authentication)
+# ============================================
+
+# Test 9: Update user profile
+mutation UpdateProfile {
+  updateUser(input: {
+    displayName: "Test User"
+    bio: "This is a test bio"
+    showEmail: false
+  }) {
+    uid
+    displayName
+    bio
+  }
+}
+
+# Test 10: Create an organization
+mutation CreateOrganization {
+  createOrganization(input: {
+    name: "Test Organization"
+    description: "This is a test organization created via GraphQL"
+    website: "https://example.com"
+  }) {
+    id
+    name
+    description
+    status
+    ownerId
+    createdAt
+  }
+}
+
+# Test 11: Create an event
+# Replace ORGANIZATION_ID with an actual organization ID you own
+mutation CreateEvent {
+  createEvent(input: {
+    title: "Test Event"
+    description: "This is a test event"
+    organizerId: "ORGANIZATION_ID"
+    startTime: "2024-12-31T18:00:00Z"
+    endTime: "2024-12-31T22:00:00Z"
+    capacity: 100
+    currency: "CHF"
+    pricingTiers: [
+      {
+        name: "General Admission"
+        price: 25.00
+        quantity: 100
+      }
+    ]
+    location: {
+      name: "Test Venue"
+      latitude: 46.5197
+      longitude: 6.6323
+    }
+    tags: ["TEST", "MUSIC"]
+  }) {
+    id
+    title
+    ticketsRemaining
+    pricingTiers {
+      name
+      price
+      remaining
+    }
+  }
+}
+
+# Test 12: Search events with filters
+query SearchEvents {
+  events(
+    filters: {
+      searchQuery: "test"
+      status: PUBLISHED
+    }
+    first: 10
+  ) {
+    edges {
+      node {
+        id
+        title
+        startTime
+        ticketsRemaining
+      }
+    }
+  }
+}
+
+# Test 13: Get events by organization
+query GetEventsByOrganization {
+  eventsByOrganization(organizationId: "ORGANIZATION_ID") {
+    id
+    title
+    status
+    startTime
+  }
+}
+
+# ============================================
+# SUBSCRIPTIONS (Future - Not yet implemented)
+# ============================================
+# These will be available in future phases
+

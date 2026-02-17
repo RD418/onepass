@@ -1,0 +1,68 @@
+type Ticket {
+  id: ID!
+  eventId: ID!
+  event: Event!
+  ownerId: ID!
+  owner: User!
+  tierId: ID!
+  tier: PricingTier!
+  state: TicketState!
+  purchasePrice: Float!
+  listingPrice: Float
+  currency: String!
+  transferLock: Boolean!
+  version: Int!
+  issuedAt: DateTime!
+  expiresAt: DateTime
+  listedAt: DateTime
+  deletedAt: DateTime
+  
+  # Computed fields
+  isListed: Boolean!
+  canBeListed: Boolean!
+}
+
+enum TicketState {
+  ISSUED
+  LISTED
+  TRANSFERRED
+  REDEEMED
+  REVOKED
+}
+
+input PurchaseTicketInput {
+  eventId: ID!
+  tierId: ID!
+  paymentMethodId: String!
+  quantity: Int!
+}
+
+input ListTicketInput {
+  ticketId: ID!
+  listingPrice: Float!
+}
+
+input TransferTicketInput {
+  ticketId: ID!
+  recipientEmail: String!
+}
+
+extend type Query {
+  ticket(id: ID!): Ticket
+  myTickets(filters: TicketFilters): [Ticket!]!
+  listedTickets(eventId: ID): [Ticket!]!
+}
+
+input TicketFilters {
+  state: TicketState
+  eventId: ID
+}
+
+extend type Mutation {
+  purchaseTickets(input: PurchaseTicketInput!): [Ticket!]!
+  listTicket(input: ListTicketInput!): Ticket!
+  unlistTicket(ticketId: ID!): Ticket!
+  transferTicket(input: TransferTicketInput!): Ticket!
+  redeemTicket(ticketId: ID!): Ticket!
+}
+

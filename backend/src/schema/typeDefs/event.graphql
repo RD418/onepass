@@ -1,0 +1,133 @@
+type Event {
+  id: ID!
+  title: String!
+  description: String!
+  organizerId: ID!
+  organizer: Organization!
+  organizerName: String!
+  status: EventStatus!
+  location: Location
+  startTime: DateTime!
+  endTime: DateTime!
+  capacity: Int!
+  ticketsRemaining: Int!
+  ticketsIssued: Int!
+  ticketsRedeemed: Int!
+  currency: String!
+  pricingTiers: [PricingTier!]!
+  images: [String!]!
+  tags: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  
+  # Computed fields
+  lowestPrice: Float!
+  isSoldOut: Boolean!
+  isPublished: Boolean!
+}
+
+type Location {
+  name: String!
+  latitude: Float!
+  longitude: Float!
+}
+
+type PricingTier {
+  id: ID!
+  name: String!
+  price: Float!
+  quantity: Int!
+  remaining: Int!
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELLED
+}
+
+input EventFilters {
+  status: EventStatus
+  organizerId: ID
+  tags: [String!]
+  startTimeFrom: DateTime
+  startTimeTo: DateTime
+  searchQuery: String
+  location: LocationInput
+  radiusKm: Float
+}
+
+input LocationInput {
+  name: String!
+  latitude: Float!
+  longitude: Float!
+}
+
+input CreateEventInput {
+  title: String!
+  description: String!
+  organizerId: ID!
+  location: LocationInput
+  startTime: DateTime!
+  endTime: DateTime!
+  capacity: Int!
+  currency: String
+  pricingTiers: [PricingTierInput!]!
+  images: [String!]
+  tags: [String!]
+}
+
+input PricingTierInput {
+  name: String!
+  price: Float!
+  quantity: Int!
+}
+
+input UpdateEventInput {
+  title: String
+  description: String
+  status: EventStatus
+  location: LocationInput
+  startTime: DateTime
+  endTime: DateTime
+  capacity: Int
+  pricingTiers: [PricingTierInput!]
+  images: [String!]
+  tags: [String!]
+}
+
+type EventConnection {
+  edges: [EventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EventEdge {
+  node: Event!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+extend type Query {
+  events(filters: EventFilters, first: Int, after: String): EventConnection!
+  event(id: ID!): Event
+  featuredEvents: [Event!]!
+  eventsByOrganization(organizationId: ID!): [Event!]!
+}
+
+extend type Mutation {
+  createEvent(input: CreateEventInput!): Event!
+  updateEvent(id: ID!, input: UpdateEventInput!): Event!
+  deleteEvent(id: ID!): Boolean!
+  addEventImage(eventId: ID!, imageUrl: String!): Event!
+  removeEventImage(eventId: ID!, imageUrl: String!): Event!
+}
+

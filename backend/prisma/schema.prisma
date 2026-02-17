@@ -1,0 +1,437 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+// ============================================================================
+// USER MODELS
+// ============================================================================
+
+model User {
+  uid              String    @id @db.Uuid
+  email            String    @unique
+  displayName      String?   @map("display_name")
+  bio              String?
+  avatarUrl        String?   @map("avatar_url")
+  coverUrl         String?   @map("cover_url")
+  phoneE164        String?   @map("phone_e164")
+  country          String?   @db.Char(2)
+  stripeCustomerId String?   @map("stripe_customer_id")
+  status           UserStatus @default(ACTIVE)
+  showEmail        Boolean   @default(false) @map("show_email")
+  analyticsEnabled Boolean   @default(true) @map("analytics_enabled")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz
+
+  // Relations
+  tickets            Ticket[]
+  favoriteEvents     UserFavoriteEvent[]
+  deviceTokens       DeviceToken[]
+  notifications      Notification[]
+  memberships        Membership[]
+  ownedOrganizations Organization[]      @relation("OrganizationOwner")
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+  DELETED
+}
+
+// ============================================================================
+// ORGANIZATION MODELS
+// ============================================================================
+
+model Organization {
+  id                       String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String
+  description              String?
+  ownerId                  String             @map("owner_id") @db.Uuid
+  status                   OrganizationStatus @default(PENDING)
+  verified                 Boolean            @default(false)
+  profileImageUrl          String?            @map("profile_image_url")
+  coverImageUrl            String?            @map("cover_image_url")
+  website                  String?
+  instagram                String?
+  tiktok                   String?
+  facebook                 String?
+  contactEmail             String?            @map("contact_email")
+  contactPhone             String?            @map("contact_phone")
+  phonePrefix              String?            @map("phone_prefix")
+  address                  String?
+  followerCount            Int                @default(0) @map("follower_count")
+  averageRating            Decimal            @default(0) @db.Decimal(3, 2) @map("average_rating")
+  stripeConnectedAccountId String?            @map("stripe_connected_account_id")
+  stripeAccountStatus      String?            @map("stripe_account_status")
+  stripeChargesEnabled     Boolean            @default(false) @map("stripe_charges_enabled")
+  stripePayoutsEnabled     Boolean            @default(false) @map("stripe_payouts_enabled")
+  stripeAccountError       String?            @map("stripe_account_error")
+  createdAt                DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  owner       User                     @relation("OrganizationOwner", fields: [ownerId], references: [uid], onDelete: Cascade)
+  events      Event[]
+  memberships Membership[]
+  invitations OrganizationInvitation[]
+  posts       Post[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([name])
+  @@map("organizations")
+}
+
+enum OrganizationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+model Membership {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  role           OrganizationRole
+  status         MembershipStatus @default(ACTIVE)
+  joinedAt       DateTime         @default(now()) @map("joined_at") @db.Timestamptz
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [uid], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("memberships")
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  STAFF
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model OrganizationInvitation {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String           @map("org_id") @db.Uuid
+  inviteeEmail String           @map("invitee_email")
+  role         OrganizationRole
+  invitedBy    String           @map("invited_by") @db.Uuid
+  status       InvitationStatus @default(PENDING)
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  expiresAt    DateTime?        @map("expires_at") @db.Timestamptz
+
+  // Relations
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([inviteeEmail])
+  @@index([status])
+  @@map("organization_invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  REVOKED
+}
+
+model Post {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  title          String
+  content        String
+  imageUrl       String?  @map("image_url")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+// ============================================================================
+// EVENT MODELS
+// ============================================================================
+
+model Event {
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String
+  description      String
+  organizerId      String      @map("organizer_id") @db.Uuid
+  organizerName    String      @map("organizer_name")
+  status           EventStatus @default(PUBLISHED)
+  locationName     String?     @map("location_name")
+  locationPoint    String?     @map("location_point") // Will store as GEOGRAPHY(Point, 4326)
+  startTime        DateTime    @map("start_time") @db.Timestamptz
+  endTime          DateTime    @map("end_time") @db.Timestamptz
+  capacity         Int         @default(0)
+  ticketsRemaining Int         @default(0) @map("tickets_remaining")
+  ticketsIssued    Int         @default(0) @map("tickets_issued")
+  ticketsRedeemed  Int         @default(0) @map("tickets_redeemed")
+  currency         String      @default("CHF") @db.Char(3)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt        DateTime?   @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  organizer     Organization       @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  pricingTiers  EventPricingTier[]
+  images        EventImage[]
+  tags          EventTag[]
+  tickets       Ticket[]
+  passes        Pass[]
+  payments      Payment[]
+  favoriteUsers UserFavoriteEvent[]
+
+  @@index([organizerId])
+  @@index([status])
+  @@index([startTime])
+  @@index([title])
+  @@map("events")
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELLED
+}
+
+model EventPricingTier {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId   String   @map("event_id") @db.Uuid
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  quantity  Int
+  remaining Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tickets Ticket[]
+
+  @@index([eventId])
+  @@map("event_pricing_tiers")
+}
+
+model EventImage {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId      String   @map("event_id") @db.Uuid
+  imageUrl     String   @map("image_url")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("event_images")
+}
+
+model EventTag {
+  eventId String @map("event_id") @db.Uuid
+  tag     String @db.VarChar(50)
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, tag])
+  @@index([tag])
+  @@map("event_tags")
+}
+
+model UserFavoriteEvent {
+  userId  String   @map("user_id") @db.Uuid
+  eventId String   @map("event_id") @db.Uuid
+  addedAt DateTime @default(now()) @map("added_at") @db.Timestamptz
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [uid], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+  @@map("user_favorite_events")
+}
+
+// ============================================================================
+// TICKET MODELS
+// ============================================================================
+
+model Ticket {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId       String      @map("event_id") @db.Uuid
+  ownerId       String      @map("owner_id") @db.Uuid
+  tierId        String      @map("tier_id") @db.Uuid
+  state         TicketState @default(ISSUED)
+  purchasePrice Decimal     @map("purchase_price") @db.Decimal(10, 2)
+  listingPrice  Decimal?    @map("listing_price") @db.Decimal(10, 2)
+  currency      String      @default("CHF") @db.Char(3)
+  transferLock  Boolean     @default(false) @map("transfer_lock")
+  version       Int         @default(1)
+  issuedAt      DateTime    @default(now()) @map("issued_at") @db.Timestamptz
+  expiresAt     DateTime?   @map("expires_at") @db.Timestamptz
+  listedAt      DateTime?   @map("listed_at") @db.Timestamptz
+  deletedAt     DateTime?   @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  event Event            @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  owner User             @relation(fields: [ownerId], references: [uid], onDelete: Restrict)
+  tier  EventPricingTier @relation(fields: [tierId], references: [id])
+  pass  Pass?
+
+  @@index([eventId])
+  @@index([ownerId])
+  @@index([state])
+  @@map("tickets")
+}
+
+enum TicketState {
+  ISSUED
+  LISTED
+  TRANSFERRED
+  REDEEMED
+  REVOKED
+}
+
+// ============================================================================
+// PASS & SCAN MODELS
+// ============================================================================
+
+model Pass {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId       String    @unique @map("ticket_id") @db.Uuid
+  eventId        String    @map("event_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  passData       String    @map("pass_data") // Encrypted pass data
+  validationCode String    @unique @map("validation_code")
+  isValid        Boolean   @default(true) @map("is_valid")
+  validatedAt    DateTime? @map("validated_at") @db.Timestamptz
+  validatedBy    String?   @map("validated_by") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([validationCode])
+  @@map("passes")
+}
+
+// ============================================================================
+// PAYMENT MODELS
+// ============================================================================
+
+model Payment {
+  id                    String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String        @map("user_id") @db.Uuid
+  eventId               String        @map("event_id") @db.Uuid
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("CHF") @db.Char(3)
+  status                PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?       @unique @map("stripe_payment_intent_id")
+  stripeChargeId        String?       @map("stripe_charge_id")
+  paymentMethod         String?       @map("payment_method")
+  metadata              Json?
+  createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+// ============================================================================
+// NOTIFICATION MODELS
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [uid], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  EVENT_REMINDER
+  TICKET_PURCHASE
+  TICKET_TRANSFER
+  ORGANIZATION_INVITE
+  EVENT_UPDATE
+  SYSTEM
+}
+
+// ============================================================================
+// DEVICE TOKEN MODELS
+// ============================================================================
+
+model DeviceToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [uid], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+

@@ -1,0 +1,31 @@
+type Notification {
+  id: ID!
+  userId: ID!
+  type: NotificationType!
+  title: String!
+  message: String!
+  data: JSON
+  read: Boolean!
+  createdAt: DateTime!
+}
+
+enum NotificationType {
+  EVENT_REMINDER
+  TICKET_PURCHASE
+  TICKET_TRANSFER
+  ORGANIZATION_INVITE
+  EVENT_UPDATE
+  SYSTEM
+}
+
+extend type Query {
+  notifications(limit: Int, onlyUnread: Boolean): [Notification!]!
+  unreadNotificationCount: Int!
+}
+
+extend type Mutation {
+  markNotificationRead(id: ID!): Notification!
+  markAllNotificationsRead: Boolean!
+  deleteNotification(id: ID!): Boolean!
+}
+

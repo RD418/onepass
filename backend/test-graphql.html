@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #6366f1;
+            color: white;
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .section label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .section input,
+        .section textarea {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .section textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #4f46e5;
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .response {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 200px;
+        }
+        
+        .response.success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .response.error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .examples {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .examples h3 {
+            margin-bottom: 12px;
+            color: #374151;
+        }
+        
+        .example-btn {
+            display: inline-block;
+            margin: 4px;
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .example-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 GraphQL API Tester</h1>
+            <p>Test your GraphQL API directly from the browser</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <label for="endpoint">GraphQL Endpoint:</label>
+                <input type="text" id="endpoint" value="http://localhost:4000/graphql" />
+                
+                <label for="token">Authorization Token (optional):</label>
+                <input type="text" id="token" placeholder="Bearer YOUR_TOKEN_HERE" />
+                
+                <label for="query">GraphQL Query/Mutation:</label>
+                <textarea id="query" placeholder='query { featuredEvents { id title } }'></textarea>
+                
+                <button class="btn" onclick="sendRequest()">Send Request</button>
+                
+                <div class="examples">
+                    <h3>Quick Examples:</h3>
+                    <button class="example-btn" onclick="loadExample('featuredEvents')">Featured Events</button>
+                    <button class="example-btn" onclick="loadExample('events')">Get Events</button>
+                    <button class="example-btn" onclick="loadExample('me')">Get Me (Auth)</button>
+                    <button class="example-btn" onclick="loadExample('updateUser')">Update User (Auth)</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <label>Response:</label>
+                <div id="response" class="response">// Response will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const examples = {
+            featuredEvents: `query {
+  featuredEvents {
+    id
+    title
+    description
+    organizerName
+    startTime
+    ticketsRemaining
+    lowestPrice
+    isSoldOut
+  }
+}`,
+            events: `query {
+  events(first: 5) {
+    edges {
+      node {
+        id
+        title
+        description
+        status
+        organizerName
+        startTime
+        ticketsRemaining
+      }
+    }
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}`,
+            me: `query {
+  me {
+    uid
+    email
+    displayName
+    bio
+    avatarUrl
+    status
+    createdAt
+  }
+}`,
+            updateUser: `mutation {
+  updateUser(input: {
+    displayName: "Test User Updated"
+    bio: "Updated bio"
+  }) {
+    uid
+    displayName
+    bio
+  }
+}`
+        };
+
+        function loadExample(name) {
+            document.getElementById('query').value = examples[name] || '';
+        }
+
+        async function sendRequest() {
+            const endpoint = document.getElementById('endpoint').value;
+            const token = document.getElementById('token').value;
+            const query = document.getElementById('query').value;
+            const responseDiv = document.getElementById('response');
+
+            if (!query.trim()) {
+                responseDiv.textContent = '❌ Please enter a query';
+                responseDiv.className = 'response error';
+                return;
+            }
+
+            responseDiv.textContent = '⏳ Sending request...';
+            responseDiv.className = 'response';
+
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+
+            if (token) {
+                headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ query }),
+                });
+
+                const data = await response.json();
+
+                if (data.errors) {
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                    responseDiv.className = 'response error';
+                } else {
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                    responseDiv.className = 'response success';
+                }
+            } catch (error) {
+                responseDiv.textContent = `❌ Error: ${error.message}`;
+                responseDiv.className = 'response error';
+            }
+        }
+
+        // Allow Enter+Ctrl to send request
+        document.getElementById('query').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                sendRequest();
+            }
+        });
+    </script>
+</body>
+</html>

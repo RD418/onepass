@@ -1,0 +1,158 @@
+type Organization {
+  id: ID!
+  name: String!
+  description: String
+  ownerId: ID!
+  owner: User!
+  status: OrganizationStatus!
+  verified: Boolean!
+  profileImageUrl: String
+  coverImageUrl: String
+  website: String
+  instagram: String
+  tiktok: String
+  facebook: String
+  contactEmail: String
+  contactPhone: String
+  phonePrefix: String
+  address: String
+  followerCount: Int!
+  averageRating: Float!
+  stripeConnectedAccountId: String
+  stripeAccountStatus: String
+  stripeChargesEnabled: Boolean!
+  stripePayoutsEnabled: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  
+  # Relations
+  events: [Event!]!
+  memberships: [Membership!]!
+  posts: [Post!]!
+}
+
+enum OrganizationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+type Membership {
+  id: ID!
+  userId: ID!
+  user: User!
+  organizationId: ID!
+  organization: Organization!
+  role: OrganizationRole!
+  status: MembershipStatus!
+  joinedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  STAFF
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+type OrganizationInvitation {
+  id: ID!
+  orgId: ID!
+  organization: Organization!
+  inviteeEmail: String!
+  role: OrganizationRole!
+  invitedBy: ID!
+  status: InvitationStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  expiresAt: DateTime
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  REVOKED
+}
+
+type Post {
+  id: ID!
+  organizationId: ID!
+  organization: Organization!
+  title: String!
+  content: String!
+  imageUrl: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateOrganizationInput {
+  name: String!
+  description: String
+  profileImageUrl: String
+  coverImageUrl: String
+  website: String
+  instagram: String
+  tiktok: String
+  facebook: String
+  contactEmail: String
+  contactPhone: String
+  phonePrefix: String
+  address: String
+}
+
+input UpdateOrganizationInput {
+  name: String
+  description: String
+  profileImageUrl: String
+  coverImageUrl: String
+  website: String
+  instagram: String
+  tiktok: String
+  facebook: String
+  contactEmail: String
+  contactPhone: String
+  phonePrefix: String
+  address: String
+}
+
+input InviteMemberInput {
+  organizationId: ID!
+  inviteeEmail: String!
+  role: OrganizationRole!
+}
+
+input UpdateMemberRoleInput {
+  membershipId: ID!
+  role: OrganizationRole!
+}
+
+extend type Query {
+  organization(id: ID!): Organization
+  myOrganizations: [Organization!]!
+  searchOrganizations(query: String!, limit: Int): [Organization!]!
+  organizationInvitations(organizationId: ID): [OrganizationInvitation!]!
+  myInvitations: [OrganizationInvitation!]!
+}
+
+extend type Mutation {
+  createOrganization(input: CreateOrganizationInput!): Organization!
+  updateOrganization(id: ID!, input: UpdateOrganizationInput!): Organization!
+  deleteOrganization(id: ID!): Boolean!
+  inviteMember(input: InviteMemberInput!): OrganizationInvitation!
+  acceptInvitation(invitationId: ID!): Membership!
+  rejectInvitation(invitationId: ID!): Boolean!
+  updateMemberRole(input: UpdateMemberRoleInput!): Membership!
+  removeMember(membershipId: ID!): Boolean!
+  createPost(organizationId: ID!, title: String!, content: String!, imageUrl: String): Post!
+}
+
