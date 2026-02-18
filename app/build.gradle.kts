@@ -9,6 +9,7 @@ plugins {
   id("jacoco")
   id("com.google.gms.google-services")
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.apollo)
 }
 
 android {
@@ -56,6 +57,18 @@ android {
         buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", "\"${stripePublishableKey ?: ""}\"")
         val oneSignalAppId: String? = localProperties.getProperty("ONESIGNAL_APP_ID")
         buildConfigField("String", "ONESIGNAL_APP_ID", "\"${oneSignalAppId ?: ""}\"")
+        
+        // GraphQL endpoint URL - configure in local.properties
+        val graphqlUrl: String? = localProperties.getProperty("GRAPHQL_URL")
+        buildConfigField("String", "GRAPHQL_URL", "\"${graphqlUrl ?: ""}\"")
+        
+        if (graphqlUrl.isNullOrBlank()) {
+            logger.warn(
+                "⚠️ GraphQL URL not found in local.properties. " +
+                        "Using default emulator URL (http://10.0.2.2:4000/graphql). " +
+                        "Set GRAPHQL_URL in local.properties for custom endpoint."
+            )
+        }
 
         // Enable multidex for handling large number of methods (Compose UI, etc.)
         multiDexEnabled = true
@@ -151,6 +164,18 @@ android {
     }
 }
 
+apollo {
+  service("onepass") {
+    packageName.set("ch.onepass.onepass.graphql")
+    // Generate Kotlin models
+    generateKotlinModels.set(true)
+    // Custom scalar mappings for DateTime
+    mapScalar("DateTime", "kotlinx.datetime.Instant")
+    // Enable nullability annotations
+    generateOptionalOperationVariables.set(false)
+  }
+}
+
 sonar {
   properties {
     property("sonar.projectKey", "onepass-ch_onepass")
@@ -240,6 +265,10 @@ dependencies {
     // --------- Networking with OkHttp ---------
     implementation(libs.okhttp)
 
+    // --------- Apollo GraphQL ---------
+    implementation(libs.apollo.runtime)
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+
     // ------------- GeoFirestore ------------------
     implementation(libs.geofirestore.android)
 
@@ -275,6 +304,9 @@ dependencies {
     // --------- MockK for Mocking (unified version) ---------
     testImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation("io.mockk:mockk-android:1.13.10")
+
+    // --------- Apollo MockServer for Testing ---------
+    testImplementation(libs.apollo.mockserver)
 
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")

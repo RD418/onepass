@@ -30,6 +30,7 @@ mlkit-barcode-scanning = "17.3.0"
 
 camerax = "1.3.4"
 multidex = "2.0.1"
+apollo = "4.0.0"
 
 [libraries]
 camerax-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
@@ -85,6 +86,10 @@ androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "mult
 # Stripe
 stripe-android = { module = "com.stripe:stripe-android", version.ref = "stripe" }
 
+# Apollo GraphQL
+apollo-runtime = { module = "com.apollographql.apollo3:apollo-runtime", version.ref = "apollo" }
+apollo-mockserver = { module = "com.apollographql.apollo3:apollo-mockserver", version.ref = "apollo" }
+
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -92,3 +97,4 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 sonar = { id = "org.sonarqube", version.ref = "sonar" }
 gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+apollo = { id = "com.apollographql.apollo3", version.ref = "apollo" }
