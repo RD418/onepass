@@ -1,0 +1,36 @@
+query SearchEvents($searchQuery: String!, $first: Int, $after: String, $status: EventStatus) {
+  events(
+    first: $first
+    after: $after
+    filters: { searchQuery: $searchQuery, status: $status }
+  ) {
+    edges {
+      node {
+        id
+        title
+        description
+        organizerName
+        startTime
+        endTime
+        ticketsRemaining
+        lowestPrice
+        isSoldOut
+        currency
+        images
+        tags
+        location {
+          name
+          latitude
+          longitude
+        }
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+    }
+    totalCount
+  }
+}

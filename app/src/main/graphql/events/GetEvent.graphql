@@ -1,0 +1,43 @@
+query GetEvent($id: ID!) {
+  event(id: $id) {
+    id
+    title
+    description
+    organizerId
+    organizerName
+    status
+    startTime
+    endTime
+    capacity
+    ticketsRemaining
+    ticketsIssued
+    ticketsRedeemed
+    currency
+    lowestPrice
+    isSoldOut
+    isPublished
+    images
+    tags
+    createdAt
+    updatedAt
+    location {
+      name
+      latitude
+      longitude
+    }
+    pricingTiers {
+      id
+      name
+      price
+      quantity
+      remaining
+    }
+    organizer {
+      id
+      name
+      description
+      profileImageUrl
+      verified
+    }
+  }
+}

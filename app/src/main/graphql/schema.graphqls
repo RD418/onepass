@@ -1,0 +1,428 @@
+# OnePass GraphQL Schema
+
+# Scalars
+scalar DateTime
+scalar JSON
+
+# Base Query and Mutation types
+type Query {
+  _empty: String
+}
+
+type Mutation {
+  _empty: String
+}
+
+# User Types
+type User {
+  uid: ID!
+  email: String!
+  displayName: String
+  bio: String
+  avatarUrl: String
+  coverUrl: String
+  phoneE164: String
+  country: String
+  status: UserStatus!
+  showEmail: Boolean!
+  analyticsEnabled: Boolean!
+  createdAt: DateTime!
+  lastLoginAt: DateTime
+  
+  # Relations
+  organizations: [Organization!]!
+  tickets: [Ticket!]!
+  favoriteEvents: [Event!]!
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+  DELETED
+}
+
+input UpdateUserInput {
+  displayName: String
+  bio: String
+  avatarUrl: String
+  coverUrl: String
+  phoneE164: String
+  country: String
+  showEmail: Boolean
+  analyticsEnabled: Boolean
+}
+
+extend type Query {
+  me: User
+  user(uid: ID!): User
+  searchUsers(query: String!, limit: Int): [User!]!
+}
+
+extend type Mutation {
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser: Boolean!
+  addFavoriteEvent(eventId: ID!): User!
+  removeFavoriteEvent(eventId: ID!): User!
+}
+
+# Event Types
+type Event {
+  id: ID!
+  title: String!
+  description: String!
+  organizerId: ID!
+  organizer: Organization!
+  organizerName: String!
+  status: EventStatus!
+  location: Location
+  startTime: DateTime!
+  endTime: DateTime!
+  capacity: Int!
+  ticketsRemaining: Int!
+  ticketsIssued: Int!
+  ticketsRedeemed: Int!
+  currency: String!
+  pricingTiers: [PricingTier!]!
+  images: [String!]!
+  tags: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  
+  # Computed fields
+  lowestPrice: Float!
+  isSoldOut: Boolean!
+  isPublished: Boolean!
+}
+
+type Location {
+  name: String!
+  latitude: Float!
+  longitude: Float!
+}
+
+type PricingTier {
+  id: ID!
+  name: String!
+  price: Float!
+  quantity: Int!
+  remaining: Int!
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELLED
+}
+
+input EventFilters {
+  status: EventStatus
+  organizerId: ID
+  tags: [String!]
+  startTimeFrom: DateTime
+  startTimeTo: DateTime
+  searchQuery: String
+  location: LocationInput
+  radiusKm: Float
+}
+
+input LocationInput {
+  name: String!
+  latitude: Float!
+  longitude: Float!
+}
+
+input CreateEventInput {
+  title: String!
+  description: String!
+  organizerId: ID!
+  location: LocationInput
+  startTime: DateTime!
+  endTime: DateTime!
+  capacity: Int!
+  currency: String
+  pricingTiers: [PricingTierInput!]!
+  images: [String!]
+  tags: [String!]
+}
+
+input PricingTierInput {
+  name: String!
+  price: Float!
+  quantity: Int!
+}
+
+input UpdateEventInput {
+  title: String
+  description: String
+  status: EventStatus
+  location: LocationInput
+  startTime: DateTime
+  endTime: DateTime
+  capacity: Int
+  pricingTiers: [PricingTierInput!]
+  images: [String!]
+  tags: [String!]
+}
+
+type EventConnection {
+  edges: [EventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EventEdge {
+  node: Event!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+extend type Query {
+  events(filters: EventFilters, first: Int, after: String): EventConnection!
+  event(id: ID!): Event
+  featuredEvents: [Event!]!
+  eventsByOrganization(organizationId: ID!): [Event!]!
+}
+
+extend type Mutation {
+  createEvent(input: CreateEventInput!): Event!
+  updateEvent(id: ID!, input: UpdateEventInput!): Event!
+  deleteEvent(id: ID!): Boolean!
+  addEventImage(eventId: ID!, imageUrl: String!): Event!
+  removeEventImage(eventId: ID!, imageUrl: String!): Event!
+}
+
+# Organization Types
+type Organization {
+  id: ID!
+  name: String!
+  description: String
+  ownerId: ID!
+  owner: User!
+  status: OrganizationStatus!
+  verified: Boolean!
+  profileImageUrl: String
+  coverImageUrl: String
+  website: String
+  instagram: String
+  tiktok: String
+  facebook: String
+  contactEmail: String
+  contactPhone: String
+  phonePrefix: String
+  address: String
+  followerCount: Int!
+  averageRating: Float!
+  stripeConnectedAccountId: String
+  stripeAccountStatus: String
+  stripeChargesEnabled: Boolean!
+  stripePayoutsEnabled: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  
+  # Relations
+  events: [Event!]!
+  memberships: [Membership!]!
+  posts: [Post!]!
+}
+
+enum OrganizationStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+type Membership {
+  id: ID!
+  userId: ID!
+  user: User!
+  organizationId: ID!
+  organization: Organization!
+  role: OrganizationRole!
+  status: MembershipStatus!
+  joinedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  STAFF
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+type OrganizationInvitation {
+  id: ID!
+  orgId: ID!
+  organization: Organization!
+  inviteeEmail: String!
+  role: OrganizationRole!
+  invitedBy: ID!
+  status: InvitationStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  expiresAt: DateTime
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  REVOKED
+}
+
+type Post {
+  id: ID!
+  organizationId: ID!
+  organization: Organization!
+  title: String!
+  content: String!
+  imageUrl: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateOrganizationInput {
+  name: String!
+  description: String
+  profileImageUrl: String
+  coverImageUrl: String
+  website: String
+  instagram: String
+  tiktok: String
+  facebook: String
+  contactEmail: String
+  contactPhone: String
+  phonePrefix: String
+  address: String
+}
+
+input UpdateOrganizationInput {
+  name: String
+  description: String
+  profileImageUrl: String
+  coverImageUrl: String
+  website: String
+  instagram: String
+  tiktok: String
+  facebook: String
+  contactEmail: String
+  contactPhone: String
+  phonePrefix: String
+  address: String
+}
+
+input InviteMemberInput {
+  organizationId: ID!
+  inviteeEmail: String!
+  role: OrganizationRole!
+}
+
+input UpdateMemberRoleInput {
+  membershipId: ID!
+  role: OrganizationRole!
+}
+
+extend type Query {
+  organization(id: ID!): Organization
+  myOrganizations: [Organization!]!
+  searchOrganizations(query: String!, limit: Int): [Organization!]!
+  organizationInvitations(organizationId: ID): [OrganizationInvitation!]!
+  myInvitations: [OrganizationInvitation!]!
+}
+
+extend type Mutation {
+  createOrganization(input: CreateOrganizationInput!): Organization!
+  updateOrganization(id: ID!, input: UpdateOrganizationInput!): Organization!
+  deleteOrganization(id: ID!): Boolean!
+  inviteMember(input: InviteMemberInput!): OrganizationInvitation!
+  acceptInvitation(invitationId: ID!): Membership!
+  rejectInvitation(invitationId: ID!): Boolean!
+  updateMemberRole(input: UpdateMemberRoleInput!): Membership!
+  removeMember(membershipId: ID!): Boolean!
+  createPost(organizationId: ID!, title: String!, content: String!, imageUrl: String): Post!
+}
+
+# Ticket Types
+type Ticket {
+  id: ID!
+  eventId: ID!
+  event: Event!
+  ownerId: ID!
+  owner: User!
+  tierId: ID!
+  tier: PricingTier!
+  state: TicketState!
+  purchasePrice: Float!
+  listingPrice: Float
+  currency: String!
+  transferLock: Boolean!
+  version: Int!
+  issuedAt: DateTime!
+  expiresAt: DateTime
+  listedAt: DateTime
+  deletedAt: DateTime
+  
+  # Computed fields
+  isListed: Boolean!
+  canBeListed: Boolean!
+}
+
+enum TicketState {
+  ISSUED
+  LISTED
+  TRANSFERRED
+  REDEEMED
+  REVOKED
+}
+
+input PurchaseTicketInput {
+  eventId: ID!
+  tierId: ID!
+  paymentMethodId: String!
+  quantity: Int!
+}
+
+input ListTicketInput {
+  ticketId: ID!
+  listingPrice: Float!
+}
+
+input TransferTicketInput {
+  ticketId: ID!
+  recipientEmail: String!
+}
+
+input TicketFilters {
+  state: TicketState
+  eventId: ID
+}
+
+extend type Query {
+  ticket(id: ID!): Ticket
+  myTickets(filters: TicketFilters): [Ticket!]!
+  listedTickets(eventId: ID): [Ticket!]!
+}
+
+extend type Mutation {
+  purchaseTickets(input: PurchaseTicketInput!): [Ticket!]!
+  listTicket(input: ListTicketInput!): Ticket!
+  unlistTicket(ticketId: ID!): Ticket!
+  transferTicket(input: TransferTicketInput!): Ticket!
+  redeemTicket(ticketId: ID!): Ticket!
+}

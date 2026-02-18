@@ -1,0 +1,36 @@
+query GetEvents($first: Int, $after: String, $filters: EventFilters) {
+  events(first: $first, after: $after, filters: $filters) {
+    edges {
+      node {
+        id
+        title
+        description
+        organizerName
+        startTime
+        endTime
+        ticketsRemaining
+        capacity
+        lowestPrice
+        isSoldOut
+        isPublished
+        status
+        currency
+        images
+        tags
+        location {
+          name
+          latitude
+          longitude
+        }
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+  }
+}

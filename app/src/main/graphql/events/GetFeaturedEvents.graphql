@@ -1,0 +1,23 @@
+query GetFeaturedEvents {
+  featuredEvents {
+    id
+    title
+    description
+    organizerName
+    startTime
+    endTime
+    ticketsRemaining
+    capacity
+    lowestPrice
+    isSoldOut
+    isPublished
+    currency
+    images
+    tags
+    location {
+      name
+      latitude
+      longitude
+    }
+  }
+}
