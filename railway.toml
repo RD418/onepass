@@ -1,7 +1,6 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "backend/Dockerfile"
-dockerContextDir = "backend"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "sh -c 'npx prisma migrate deploy && node dist/index.js'"
