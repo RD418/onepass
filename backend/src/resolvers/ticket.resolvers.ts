@@ -1,12 +1,12 @@
 import { GraphQLContext } from '../types/context';
 import { NotFoundError, ValidationError, AuthorizationError } from '../middleware/error.middleware';
-import { requireAuth } from '../middleware/auth.middleware';
+import { requireDbUser } from '../utils/auth-user';
 import { stripe } from '../services/stripe.service';
 
 export const ticketResolvers = {
   Query: {
     ticket: async (_: any, { id }: { id: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const ticket = await context.prisma.ticket.findUnique({
         where: { id },
@@ -25,7 +25,7 @@ export const ticketResolvers = {
     },
     
     myTickets: async (_: any, { filters }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const where: any = {
         ownerId: user.uid,
@@ -60,7 +60,7 @@ export const ticketResolvers = {
   
   Mutation: {
     purchaseTickets: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       // Get event and tier
       const event = await context.prisma.event.findUnique({
@@ -171,7 +171,7 @@ export const ticketResolvers = {
     },
     
     listTicket: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const ticket = await context.prisma.ticket.findUnique({
         where: { id: input.ticketId },
@@ -204,7 +204,7 @@ export const ticketResolvers = {
     },
     
     unlistTicket: async (_: any, { ticketId }: { ticketId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const ticket = await context.prisma.ticket.findUnique({
         where: { id: ticketId },
@@ -229,7 +229,7 @@ export const ticketResolvers = {
     },
     
     transferTicket: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const ticket = await context.prisma.ticket.findUnique({
         where: { id: input.ticketId },
@@ -268,7 +268,7 @@ export const ticketResolvers = {
     },
     
     redeemTicket: async (_: any, { ticketId }: { ticketId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const ticket = await context.prisma.ticket.findUnique({
         where: { id: ticketId },
@@ -344,4 +344,3 @@ export const ticketResolvers = {
     canBeListed: (parent: any) => parent.state === 'ISSUED' && !parent.transferLock,
   },
 };
-

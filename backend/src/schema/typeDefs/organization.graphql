@@ -139,6 +139,7 @@ input UpdateMemberRoleInput {
 extend type Query {
   organization(id: ID!): Organization
   myOrganizations: [Organization!]!
+  myMemberships: [Membership!]!
   searchOrganizations(query: String!, limit: Int): [Organization!]!
   organizationInvitations(organizationId: ID): [OrganizationInvitation!]!
   myInvitations: [OrganizationInvitation!]!
@@ -155,4 +156,3 @@ extend type Mutation {
   removeMember(membershipId: ID!): Boolean!
   createPost(organizationId: ID!, title: String!, content: String!, imageUrl: String): Post!
 }
-

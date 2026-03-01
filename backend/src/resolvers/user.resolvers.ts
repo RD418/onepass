@@ -1,15 +1,12 @@
 import { GraphQLContext } from '../types/context';
-import { AuthenticationError, NotFoundError } from '../middleware/error.middleware';
+import { NotFoundError } from '../middleware/error.middleware';
 import { requireAuth } from '../middleware/auth.middleware';
+import { requireDbUser } from '../utils/auth-user';
 
 export const userResolvers = {
   Query: {
     me: async (_: any, __: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
-      
-      return await context.prisma.user.findUnique({
-        where: { uid: user.uid },
-      });
+      return await requireDbUser(context);
     },
     
     user: async (_: any, { uid }: { uid: string }, context: GraphQLContext) => {
@@ -42,7 +39,7 @@ export const userResolvers = {
   
   Mutation: {
     updateUser: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       return await context.prisma.user.update({
         where: { uid: user.uid },
@@ -60,7 +57,7 @@ export const userResolvers = {
     },
     
     deleteUser: async (_: any, __: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       await context.prisma.user.update({
         where: { uid: user.uid },
@@ -71,7 +68,7 @@ export const userResolvers = {
     },
     
     addFavoriteEvent: async (_: any, { eventId }: { eventId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       await context.prisma.userFavoriteEvent.create({
         data: {
@@ -86,7 +83,7 @@ export const userResolvers = {
     },
     
     removeFavoriteEvent: async (_: any, { eventId }: { eventId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       await context.prisma.userFavoriteEvent.delete({
         where: {
@@ -129,4 +126,3 @@ export const userResolvers = {
     },
   },
 };
-

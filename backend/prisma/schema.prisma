@@ -6,6 +6,7 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
   extensions = [postgis]
 }
 
@@ -14,7 +15,8 @@ datasource db {
 // ============================================================================
 
 model User {
-  uid              String    @id @db.Uuid
+  uid              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firebaseUid      String?   @unique @map("firebase_uid")
   email            String    @unique
   displayName      String?   @map("display_name")
   bio              String?
@@ -38,6 +40,7 @@ model User {
   ownedOrganizations Organization[]      @relation("OrganizationOwner")
 
   @@index([email])
+  @@index([firebaseUid])
   @@index([status])
   @@map("users")
 }
@@ -434,4 +437,3 @@ model DeviceToken {
   @@index([userId])
   @@map("device_tokens")
 }
-

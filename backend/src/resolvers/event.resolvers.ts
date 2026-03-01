@@ -1,7 +1,6 @@
 import { GraphQLContext } from '../types/context';
-import { AuthenticationError, NotFoundError, ValidationError, AuthorizationError } from '../middleware/error.middleware';
-import { requireAuth } from '../middleware/auth.middleware';
-import { GraphQLError } from 'graphql';
+import { NotFoundError, ValidationError, AuthorizationError } from '../middleware/error.middleware';
+import { requireDbUser } from '../utils/auth-user';
 
 export const eventResolvers = {
   Query: {
@@ -88,7 +87,7 @@ export const eventResolvers = {
   
   Mutation: {
     createEvent: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       // Verify user has permission to create event for organization
       const membership = await context.prisma.membership.findFirst({
@@ -169,7 +168,7 @@ export const eventResolvers = {
     },
     
     updateEvent: async (_: any, { id, input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const event = await context.prisma.event.findUnique({
         where: { id },
@@ -212,7 +211,7 @@ export const eventResolvers = {
     },
     
     deleteEvent: async (_: any, { id }: { id: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const event = await context.prisma.event.findUnique({
         where: { id },
@@ -245,7 +244,7 @@ export const eventResolvers = {
     },
     
     addEventImage: async (_: any, { eventId, imageUrl }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      await requireDbUser(context);
       
       const event = await context.prisma.event.findUnique({
         where: { id: eventId },
@@ -273,7 +272,7 @@ export const eventResolvers = {
     },
     
     removeEventImage: async (_: any, { eventId, imageUrl }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      await requireDbUser(context);
       
       await context.prisma.eventImage.deleteMany({
         where: {
@@ -348,4 +347,3 @@ export const eventResolvers = {
     isPublished: (parent: any) => parent.status === 'PUBLISHED',
   },
 };
-

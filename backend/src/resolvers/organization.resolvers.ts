@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../types/context';
 import { NotFoundError, ValidationError, AuthorizationError } from '../middleware/error.middleware';
-import { requireAuth } from '../middleware/auth.middleware';
+import { requireDbUser } from '../utils/auth-user';
 
 export const organizationResolvers = {
   Query: {
@@ -17,7 +17,7 @@ export const organizationResolvers = {
     },
     
     myOrganizations: async (_: any, __: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const memberships = await context.prisma.membership.findMany({
         where: {
@@ -28,6 +28,18 @@ export const organizationResolvers = {
       });
       
       return memberships.map(m => m.organization);
+    },
+
+    myMemberships: async (_: any, __: any, context: GraphQLContext) => {
+      const user = await requireDbUser(context);
+
+      return await context.prisma.membership.findMany({
+        where: {
+          userId: user.uid,
+          status: 'ACTIVE',
+        },
+        orderBy: { joinedAt: 'desc' },
+      });
     },
     
     searchOrganizations: async (_: any, { query, limit = 10 }: { query: string; limit?: number }, context: GraphQLContext) => {
@@ -41,7 +53,7 @@ export const organizationResolvers = {
     },
     
     organizationInvitations: async (_: any, { organizationId }: { organizationId?: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const where: any = {};
       
@@ -70,15 +82,7 @@ export const organizationResolvers = {
     },
     
     myInvitations: async (_: any, __: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
-      
-      const userRecord = await context.prisma.user.findUnique({
-        where: { uid: user.uid },
-      });
-      
-      if (!userRecord) {
-        throw new NotFoundError('User');
-      }
+      const userRecord = await requireDbUser(context);
       
       return await context.prisma.organizationInvitation.findMany({
         where: {
@@ -92,7 +96,7 @@ export const organizationResolvers = {
   
   Mutation: {
     createOrganization: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       // Create organization
       const org = await context.prisma.organization.create({
@@ -128,7 +132,7 @@ export const organizationResolvers = {
     },
     
     updateOrganization: async (_: any, { id, input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       // Verify permission
       const membership = await context.prisma.membership.findFirst({
@@ -164,7 +168,7 @@ export const organizationResolvers = {
     },
     
     deleteOrganization: async (_: any, { id }: { id: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const org = await context.prisma.organization.findUnique({
         where: { id },
@@ -187,7 +191,7 @@ export const organizationResolvers = {
     },
     
     inviteMember: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       // Verify permission
       const membership = await context.prisma.membership.findFirst({
@@ -249,15 +253,7 @@ export const organizationResolvers = {
     },
     
     acceptInvitation: async (_: any, { invitationId }: { invitationId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
-      
-      const userRecord = await context.prisma.user.findUnique({
-        where: { uid: user.uid },
-      });
-      
-      if (!userRecord) {
-        throw new NotFoundError('User');
-      }
+      const userRecord = await requireDbUser(context);
       
       const invitation = await context.prisma.organizationInvitation.findUnique({
         where: { id: invitationId },
@@ -287,7 +283,7 @@ export const organizationResolvers = {
       const membership = await context.prisma.$transaction(async (tx) => {
         const newMembership = await tx.membership.create({
           data: {
-            userId: user.uid,
+            userId: userRecord.uid,
             organizationId: invitation.orgId,
             role: invitation.role,
             status: 'ACTIVE',
@@ -306,15 +302,7 @@ export const organizationResolvers = {
     },
     
     rejectInvitation: async (_: any, { invitationId }: { invitationId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
-      
-      const userRecord = await context.prisma.user.findUnique({
-        where: { uid: user.uid },
-      });
-      
-      if (!userRecord) {
-        throw new NotFoundError('User');
-      }
+      const userRecord = await requireDbUser(context);
       
       const invitation = await context.prisma.organizationInvitation.findUnique({
         where: { id: invitationId },
@@ -337,7 +325,7 @@ export const organizationResolvers = {
     },
     
     updateMemberRole: async (_: any, { input }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const membership = await context.prisma.membership.findUnique({
         where: { id: input.membershipId },
@@ -373,7 +361,7 @@ export const organizationResolvers = {
     },
     
     removeMember: async (_: any, { membershipId }: { membershipId: string }, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       const membership = await context.prisma.membership.findUnique({
         where: { id: membershipId },
@@ -410,7 +398,7 @@ export const organizationResolvers = {
     },
     
     createPost: async (_: any, { organizationId, title, content, imageUrl }: any, context: GraphQLContext) => {
-      const user = requireAuth(context.user);
+      const user = await requireDbUser(context);
       
       // Verify permission
       const membership = await context.prisma.membership.findFirst({
@@ -495,4 +483,3 @@ export const organizationResolvers = {
     },
   },
 };
-
