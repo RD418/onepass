@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.organization.Post
 import ch.onepass.onepass.model.organization.PostRepository
-import ch.onepass.onepass.model.organization.PostRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.utils.FormatUtils
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -80,9 +78,9 @@ sealed interface OrganizerProfileEffect {
 // --- ViewModel ---
 
 open class OrganizerProfileViewModel(
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val eventRepository: EventRepository = EventRepositoryFirebase(),
-    private val postRepository: PostRepository = PostRepositoryFirebase(),
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val eventRepository: EventRepository = RepositoryProvider.eventRepository,
+    private val postRepository: PostRepository = RepositoryProvider.postRepository,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ViewModel() {
 

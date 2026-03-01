@@ -5,17 +5,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ch.onepass.onepass.model.membership.MembershipRepository
-import ch.onepass.onepass.model.membership.MembershipRepositoryFirebase
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
-import ch.onepass.onepass.model.organization.OrganizationRole
 import ch.onepass.onepass.model.organization.OrganizationStatus
 import ch.onepass.onepass.model.storage.StorageRepository
-import ch.onepass.onepass.model.storage.StorageRepositoryFirebase
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.utils.InputSanitizer
 import ch.onepass.onepass.utils.ValidationUtils
 import com.google.i18n.phonenumbers.PhoneNumberUtil
@@ -90,13 +85,11 @@ data class OrganizationFormUiState(
  * @param repository The organization repository for data operations.
  * @param userRepository The user repository for updating user data.
  * @param storageRepository The storage repository for image upload operations.
- * @param membershipRepository The membership repository for user-organization relationships.
  */
 class OrganizationFormViewModel(
-    private val repository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
-    private val storageRepository: StorageRepository = StorageRepositoryFirebase(),
-    private val membershipRepository: MembershipRepository = MembershipRepositoryFirebase()
+    private val repository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
+    private val storageRepository: StorageRepository = RepositoryProvider.storageRepository
 ) : ViewModel() {
 
   companion object {
@@ -594,7 +587,7 @@ class OrganizationFormViewModel(
       try {
         val createdOrgId = createOrganizationEntity(ownerId) ?: return@launch
         handleImageUploads(createdOrgId) ?: return@launch
-        addOwnerMembership(createdOrgId, ownerId)
+        _uiState.value = _uiState.value.copy(isLoading = false, successOrganizationId = createdOrgId)
       } catch (e: Exception) {
         _uiState.value =
             _uiState.value.copy(isLoading = false, errorMessage = e.message ?: "Unknown error")
@@ -710,33 +703,6 @@ class OrganizationFormViewModel(
     }
 
     return true
-  }
-
-  /**
-   * Adds the owner as a member to the organization and updates the user's organization list
-   *
-   * @param organizationId The ID of the organization
-   * @param ownerId The ID of the owner user
-   */
-  private suspend fun addOwnerMembership(organizationId: String, ownerId: String) {
-    // Create a dedicated membership entry to keep the memberships collection in sync.
-    val membershipResult =
-        membershipRepository.addMembership(ownerId, organizationId, OrganizationRole.OWNER)
-
-    membershipResult.fold(
-        onSuccess = {
-          // Membership created successfully
-          _uiState.value =
-              _uiState.value.copy(isLoading = true, successOrganizationId = organizationId)
-        },
-        onFailure = { error ->
-          _uiState.value =
-              _uiState.value.copy(
-                  isLoading = false,
-                  successOrganizationId = organizationId,
-                  errorMessage =
-                      "Organization created, but failed to add member: ${error.message ?: "Unknown error"}")
-        })
   }
 
   /** Resets the form to its initial empty state */

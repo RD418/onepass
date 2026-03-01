@@ -1,0 +1,6 @@
+mutation UnlistTicket($ticketId: ID!) {
+  unlistTicket(ticketId: $ticketId) {
+    id
+    state
+  }
+}

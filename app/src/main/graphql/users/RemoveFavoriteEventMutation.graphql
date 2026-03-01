@@ -1,0 +1,7 @@
+mutation RemoveFavoriteEvent($eventId: ID!) {
+  removeFavoriteEvent(eventId: $eventId) {
+    favoriteEvents {
+      id
+    }
+  }
+}

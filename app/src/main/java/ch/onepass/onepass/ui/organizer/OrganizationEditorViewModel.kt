@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.storage.StorageRepository
-import ch.onepass.onepass.model.storage.StorageRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,8 +94,8 @@ data class OrganizationEditorData(
  * @property storageRepository The [StorageRepository] used for image upload operations.
  */
 class OrganizationEditorViewModel(
-    private val repository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val storageRepository: StorageRepository = StorageRepositoryFirebase()
+    private val repository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val storageRepository: StorageRepository = RepositoryProvider.storageRepository
 ) : ViewModel() {
 
   /** The UI state exposed to the Composable. */

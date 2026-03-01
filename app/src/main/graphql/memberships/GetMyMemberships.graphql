@@ -1,0 +1,11 @@
+query GetMyMemberships {
+  myMemberships {
+    id
+    userId
+    organizationId
+    role
+    status
+    joinedAt
+    updatedAt
+  }
+}

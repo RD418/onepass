@@ -1,6 +1,8 @@
 package ch.onepass.onepass.network
 
+import ch.onepass.onepass.graphql.type.DateTime
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.adapter.KotlinxInstantAdapter
 import com.apollographql.apollo3.network.okHttpClient
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -51,6 +53,7 @@ object ApolloClientProvider {
         return ApolloClient.Builder()
             .serverUrl(GraphQLConfig.endpoint)
             .okHttpClient(okHttpClient)
+            .addCustomScalarAdapter(DateTime.type, KotlinxInstantAdapter)
             .build()
     }
 

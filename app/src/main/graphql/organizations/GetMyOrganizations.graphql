@@ -1,0 +1,16 @@
+query GetMyOrganizations {
+  myOrganizations {
+    id
+    name
+    description
+    ownerId
+    status
+    verified
+    profileImageUrl
+    coverImageUrl
+    followerCount
+    averageRating
+    createdAt
+    updatedAt
+  }
+}

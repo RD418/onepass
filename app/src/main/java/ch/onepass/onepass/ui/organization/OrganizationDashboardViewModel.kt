@@ -4,16 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.membership.MembershipRepository
-import ch.onepass.onepass.model.membership.MembershipRepositoryFirebase
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.organization.OrganizationRole
 import ch.onepass.onepass.model.staff.StaffSearchResult
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -69,10 +66,10 @@ data class OrganizationDashboardUiState(
  * @property auth Firebase authentication instance
  */
 class OrganizationDashboardViewModel(
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val eventRepository: EventRepository = EventRepositoryFirebase(),
-    private val membershipRepository: MembershipRepository = MembershipRepositoryFirebase(),
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val eventRepository: EventRepository = RepositoryProvider.eventRepository,
+    private val membershipRepository: MembershipRepository = RepositoryProvider.membershipRepository,
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ViewModel() {
 

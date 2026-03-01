@@ -1,0 +1,20 @@
+query GetMyTickets($filters: TicketFilters) {
+  myTickets(filters: $filters) {
+    id
+    eventId
+    ownerId
+    tierId
+    state
+    purchasePrice
+    listingPrice
+    currency
+    transferLock
+    version
+    issuedAt
+    expiresAt
+    listedAt
+    deletedAt
+    isListed
+    canBeListed
+  }
+}

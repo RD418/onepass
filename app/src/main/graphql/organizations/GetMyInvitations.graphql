@@ -1,0 +1,13 @@
+query GetMyInvitations {
+  myInvitations {
+    id
+    orgId
+    inviteeEmail
+    role
+    invitedBy
+    status
+    createdAt
+    updatedAt
+    expiresAt
+  }
+}

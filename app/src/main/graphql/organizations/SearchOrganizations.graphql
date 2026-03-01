@@ -1,0 +1,16 @@
+query SearchOrganizations($query: String!, $limit: Int) {
+  searchOrganizations(query: $query, limit: $limit) {
+    id
+    name
+    description
+    ownerId
+    status
+    verified
+    profileImageUrl
+    coverImageUrl
+    followerCount
+    averageRating
+    createdAt
+    updatedAt
+  }
+}

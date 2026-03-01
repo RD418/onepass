@@ -1,0 +1,7 @@
+mutation AddFavoriteEvent($eventId: ID!) {
+  addFavoriteEvent(eventId: $eventId) {
+    favoriteEvents {
+      id
+    }
+  }
+}

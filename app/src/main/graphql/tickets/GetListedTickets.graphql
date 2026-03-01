@@ -1,0 +1,19 @@
+query GetListedTickets($eventId: ID) {
+  listedTickets(eventId: $eventId) {
+    id
+    eventId
+    ownerId
+    tierId
+    state
+    purchasePrice
+    listingPrice
+    currency
+    transferLock
+    version
+    issuedAt
+    expiresAt
+    listedAt
+    isListed
+    canBeListed
+  }
+}

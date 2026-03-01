@@ -1,0 +1,28 @@
+query GetOrganization($id: ID!) {
+  organization(id: $id) {
+    id
+    name
+    description
+    ownerId
+    status
+    verified
+    profileImageUrl
+    coverImageUrl
+    website
+    instagram
+    tiktok
+    facebook
+    contactEmail
+    contactPhone
+    phonePrefix
+    address
+    followerCount
+    averageRating
+    stripeConnectedAccountId
+    stripeAccountStatus
+    stripeChargesEnabled
+    stripePayoutsEnabled
+    createdAt
+    updatedAt
+  }
+}

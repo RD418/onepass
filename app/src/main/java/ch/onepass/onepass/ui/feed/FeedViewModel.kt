@@ -4,11 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.event.EventStatus
 import ch.onepass.onepass.model.eventfilters.EventFilters
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.utils.EventFilteringUtils.applyFiltersLocally
 import ch.onepass.onepass.utils.TimeProvider
 import ch.onepass.onepass.utils.TimeProviderHolder
@@ -21,6 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -55,8 +55,8 @@ data class FeedUIState(
  *   features.
  */
 open class FeedViewModel(
-    private val repository: EventRepository = EventRepositoryFirebase(),
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
+    private val repository: EventRepository = RepositoryProvider.eventRepository,
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val timeProvider: TimeProvider = TimeProviderHolder.instance
 ) : ViewModel() {
@@ -90,7 +90,7 @@ open class FeedViewModel(
     val uid = auth.currentUser?.uid
     if (uid != null) {
       viewModelScope.launch {
-        userRepository.getFavoriteEvents(uid).collect { likedIds ->
+        userRepository.getFavoriteEvents(uid).catch { emit(emptySet()) }.collect { likedIds ->
           _currentLikedEvents.value = likedIds
           // If we are in favorites mode, we must update the list immediately when likes change
           if (_uiState.value.isShowingFavorites) {

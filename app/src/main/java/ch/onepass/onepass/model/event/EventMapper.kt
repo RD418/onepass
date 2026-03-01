@@ -31,7 +31,7 @@ object EventMapper {
     private fun GetFeaturedEventsQuery.Location.toLocation(): Location {
         return Location(
             name = this.name,
-            geopoint = GeoPoint(this.latitude, this.longitude)
+            coordinates = GeoPoint(this.latitude, this.longitude)
         )
     }
 
@@ -41,7 +41,7 @@ object EventMapper {
     private fun GetEventsQuery.Location.toLocation(): Location {
         return Location(
             name = this.name,
-            geopoint = GeoPoint(this.latitude, this.longitude)
+            coordinates = GeoPoint(this.latitude, this.longitude)
         )
     }
 
@@ -51,31 +51,7 @@ object EventMapper {
     private fun GetEventQuery.Location.toLocation(): Location {
         return Location(
             name = this.name,
-            geopoint = GeoPoint(this.latitude, this.longitude)
-        )
-    }
-
-    /**
-     * Converts a GraphQL PricingTier to domain PricingTier model.
-     */
-    private fun GetFeaturedEventsQuery.PricingTier.toPricingTier(): PricingTier {
-        return PricingTier(
-            name = this.name,
-            price = this.price,
-            quantity = this.quantity,
-            remaining = this.remaining
-        )
-    }
-
-    /**
-     * Converts a GraphQL PricingTier from GetEventsQuery to domain PricingTier model.
-     */
-    private fun GetEventsQuery.PricingTier.toPricingTier(): PricingTier {
-        return PricingTier(
-            name = this.name,
-            price = this.price,
-            quantity = this.quantity,
-            remaining = this.remaining
+            coordinates = GeoPoint(this.latitude, this.longitude)
         )
     }
 
@@ -100,11 +76,7 @@ object EventMapper {
             title = this.title,
             description = this.description,
             organizerName = this.organizerName,
-            status = when (this.status) {
-                // Note: GraphQL might return null for status since it's not in the query
-                // This is a simplified mapping - adjust based on your actual schema
-                else -> EventStatus.PUBLISHED
-            },
+            status = if (this.isPublished) EventStatus.PUBLISHED else EventStatus.DRAFT,
             location = this.location?.toLocation(),
             startTime = this.startTime.toFirebaseTimestamp(),
             endTime = this.endTime.toFirebaseTimestamp(),
@@ -187,7 +159,7 @@ object EventMapper {
             tags = this.tags,
             createdAt = this.createdAt.toFirebaseTimestamp(),
             updatedAt = this.updatedAt.toFirebaseTimestamp(),
-            deletedAt = this.deletedAt?.toFirebaseTimestamp()
+            deletedAt = null
         )
     }
 }

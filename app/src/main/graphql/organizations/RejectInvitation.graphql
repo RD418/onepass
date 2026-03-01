@@ -1,0 +1,3 @@
+mutation RejectInvitation($invitationId: ID!) {
+  rejectInvitation(invitationId: $invitationId)
+}

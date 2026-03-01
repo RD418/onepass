@@ -1,0 +1,11 @@
+query GetPostsByOrganization($organizationId: ID!) {
+  organization(id: $organizationId) {
+    posts {
+      id
+      organizationId
+      content
+      createdAt
+      updatedAt
+    }
+  }
+}

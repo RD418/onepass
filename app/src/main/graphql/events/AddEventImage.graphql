@@ -1,0 +1,6 @@
+mutation AddEventImage($eventId: ID!, $imageUrl: String!) {
+  addEventImage(eventId: $eventId, imageUrl: $imageUrl) {
+    id
+    images
+  }
+}

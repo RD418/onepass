@@ -142,6 +142,7 @@ android {
 
     val keystorePath = (project.findProperty("RELEASE_STORE_FILE") as String?) ?: "keystore.jks"
     val keystoreFile = file(keystorePath)
+    buildToolsVersion = "34.0.0"
 
     if (keystoreFile.exists()) {
         signingConfigs {
@@ -267,6 +268,7 @@ dependencies {
 
     // --------- Apollo GraphQL ---------
     implementation(libs.apollo.runtime)
+    implementation("com.apollographql.apollo3:apollo-adapters:3.8.6")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
     // ------------- GeoFirestore ------------------

@@ -1,0 +1,13 @@
+query GetMembershipsByOrganization($organizationId: ID!) {
+  organization(id: $organizationId) {
+    memberships {
+      id
+      userId
+      organizationId
+      role
+      status
+      joinedAt
+      updatedAt
+    }
+  }
+}

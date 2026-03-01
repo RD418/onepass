@@ -3,11 +3,12 @@ package ch.onepass.onepass.ui.event
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
  * @param auth The Firebase authentication instance to get the current user.
  */
 class EventCardViewModel(
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ViewModel() {
 
@@ -42,7 +43,7 @@ class EventCardViewModel(
     val uid = auth.currentUser?.uid
     if (uid != null) {
       viewModelScope.launch {
-        userRepository.getFavoriteEvents(uid).collect { favorites ->
+        userRepository.getFavoriteEvents(uid).catch { emit(emptySet()) }.collect { favorites ->
           _likedEvents.value = favorites
         }
       }

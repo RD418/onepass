@@ -41,7 +41,7 @@ import ch.onepass.onepass.R
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationInvitation
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.ui.components.common.EmptyState
 import ch.onepass.onepass.ui.components.common.ErrorState
 import ch.onepass.onepass.ui.components.common.LoadingState
@@ -109,7 +109,7 @@ object MyInvitationsScreenTestTags {
 @Composable
 fun MyInvitationsScreen(
     viewModel: MyInvitationsViewModel = viewModel(),
-    organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
+    organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
     onNavigateBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {

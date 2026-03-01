@@ -1,0 +1,8 @@
+mutation ListTicket($input: ListTicketInput!) {
+  listTicket(input: $input) {
+    id
+    state
+    listingPrice
+    listedAt
+  }
+}

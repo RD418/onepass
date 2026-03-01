@@ -5,13 +5,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.event.EventTag
 import ch.onepass.onepass.model.map.Location
 import ch.onepass.onepass.model.map.LocationRepository
-import ch.onepass.onepass.model.map.NominatimLocationRepository
 import ch.onepass.onepass.model.storage.StorageRepository
-import ch.onepass.onepass.model.storage.StorageRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.utils.DateTimeUtils
 import ch.onepass.onepass.utils.InputSanitizer
 import ch.onepass.onepass.utils.ValidationUtils
@@ -32,9 +30,9 @@ import kotlinx.coroutines.launch
  * @property storageRepository Repository for image storage operations
  */
 abstract class EventFormViewModel(
-    protected val eventRepository: EventRepository = EventRepositoryFirebase(),
-    protected val locationRepository: LocationRepository = NominatimLocationRepository(),
-    protected val storageRepository: StorageRepository = StorageRepositoryFirebase()
+    protected val eventRepository: EventRepository = RepositoryProvider.eventRepository,
+    protected val locationRepository: LocationRepository = RepositoryProvider.locationRepository,
+    protected val storageRepository: StorageRepository = RepositoryProvider.storageRepository
 ) : ViewModel() {
   companion object {
     const val MAX_TAG_COUNT = 5

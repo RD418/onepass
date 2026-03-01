@@ -4,15 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.membership.MembershipRepository
-import ch.onepass.onepass.model.membership.MembershipRepositoryFirebase
 import ch.onepass.onepass.model.organization.InvitationStatus
 import ch.onepass.onepass.model.organization.OrganizationInvitation
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.organization.OrganizationRole
 import ch.onepass.onepass.model.staff.StaffSearchResult
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.model.user.UserSearchType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -93,9 +91,9 @@ sealed class InvitationResult {
  */
 class StaffInvitationViewModel(
     private val organizationId: String,
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val membershipRepository: MembershipRepository = MembershipRepositoryFirebase()
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val membershipRepository: MembershipRepository = RepositoryProvider.membershipRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(StaffInvitationUiState())

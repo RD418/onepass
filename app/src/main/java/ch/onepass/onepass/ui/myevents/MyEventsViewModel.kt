@@ -11,15 +11,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.pass.PassRepository
 import ch.onepass.onepass.model.payment.PaymentRepository
 import ch.onepass.onepass.model.payment.PaymentRepositoryFirebase
 import ch.onepass.onepass.model.ticket.TicketRepository
-import ch.onepass.onepass.model.ticket.TicketRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.model.ticket.toUiTicket
 import ch.onepass.onepass.ui.theme.Primary
 import ch.onepass.onepass.ui.theme.Success
@@ -246,9 +244,9 @@ data class MyEventsUiState(
 class MyEventsViewModel(
     private val dataStore: DataStore<Preferences>,
     private val passRepository: PassRepository,
-    private val ticketRepo: TicketRepository = TicketRepositoryFirebase(),
-    private val eventRepo: EventRepository = EventRepositoryFirebase(),
-    private val orgRepo: OrganizationRepository = OrganizationRepositoryFirebase(),
+    private val ticketRepo: TicketRepository = RepositoryProvider.ticketRepository,
+    private val eventRepo: EventRepository = RepositoryProvider.eventRepository,
+    private val orgRepo: OrganizationRepository = RepositoryProvider.organizationRepository,
     private val paymentRepo: PaymentRepository = PaymentRepositoryFirebase(),
     private val userId: String?
 ) : ViewModel() {

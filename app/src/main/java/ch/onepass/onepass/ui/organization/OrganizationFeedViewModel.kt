@@ -3,9 +3,9 @@ package ch.onepass.onepass.ui.organization
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.membership.MembershipRepository
-import ch.onepass.onepass.model.membership.MembershipRepositoryFirebase
 import ch.onepass.onepass.model.organization.Organization
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
+import ch.onepass.onepass.model.organization.OrganizationRepository
+import ch.onepass.onepass.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,8 +34,8 @@ data class OrganizationFeedUIState(
  * @property repository The organization repository for data operations.
  */
 class OrganizationFeedViewModel(
-    private val repository: OrganizationRepositoryFirebase = OrganizationRepositoryFirebase(),
-    private val membershipRepository: MembershipRepository = MembershipRepositoryFirebase()
+    private val repository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val membershipRepository: MembershipRepository = RepositoryProvider.membershipRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(OrganizationFeedUIState())

@@ -6,7 +6,6 @@ import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
 import ch.onepass.onepass.model.organization.Organization
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.payment.PaymentRepository
 import ch.onepass.onepass.model.payment.PaymentRepositoryFirebase
 import ch.onepass.onepass.repository.RepositoryProvider
@@ -44,7 +43,7 @@ sealed class PaymentState {
 class EventDetailViewModel(
     private val eventId: String,
     private val eventRepository: EventRepository = RepositoryProvider.eventRepository,
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
     private val paymentRepository: PaymentRepository = PaymentRepositoryFirebase()
 ) : ViewModel() {
 

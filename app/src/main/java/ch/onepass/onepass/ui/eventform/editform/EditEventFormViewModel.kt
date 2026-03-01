@@ -3,13 +3,11 @@ package ch.onepass.onepass.ui.eventform.editform
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.event.EventTag
 import ch.onepass.onepass.model.event.PricingTier
 import ch.onepass.onepass.model.map.LocationRepository
-import ch.onepass.onepass.model.map.NominatimLocationRepository
 import ch.onepass.onepass.model.storage.StorageRepository
-import ch.onepass.onepass.model.storage.StorageRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.ui.eventform.EventFormViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -24,9 +22,9 @@ import kotlinx.coroutines.launch
  * logic.
  */
 class EditEventFormViewModel(
-    eventRepository: EventRepository = EventRepositoryFirebase(),
-    locationRepository: LocationRepository = NominatimLocationRepository(),
-    storageRepository: StorageRepository = StorageRepositoryFirebase()
+    eventRepository: EventRepository = RepositoryProvider.eventRepository,
+    locationRepository: LocationRepository = RepositoryProvider.locationRepository,
+    storageRepository: StorageRepository = RepositoryProvider.storageRepository
 ) : EventFormViewModel(eventRepository, locationRepository, storageRepository) {
 
   // UI state

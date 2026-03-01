@@ -3,13 +3,11 @@ package ch.onepass.onepass.ui.myinvitations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.membership.MembershipRepository
-import ch.onepass.onepass.model.membership.MembershipRepositoryFirebase
 import ch.onepass.onepass.model.organization.InvitationStatus
 import ch.onepass.onepass.model.organization.OrganizationInvitation
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,9 +53,9 @@ data class MyInvitationsUiState(
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyInvitationsViewModel(
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
-    private val membershipRepository: MembershipRepository = MembershipRepositoryFirebase()
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
+    private val membershipRepository: MembershipRepository = RepositoryProvider.membershipRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(MyInvitationsUiState())

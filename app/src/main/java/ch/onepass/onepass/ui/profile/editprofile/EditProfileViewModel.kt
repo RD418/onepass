@@ -4,9 +4,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.storage.StorageRepository
-import ch.onepass.onepass.model.storage.StorageRepositoryFirebase
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import java.util.Locale
@@ -32,8 +31,8 @@ data class EditProfileUiState(
 )
 
 class EditProfileViewModel(
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
-    private val storageRepository: StorageRepository = StorageRepositoryFirebase(),
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
+    private val storageRepository: StorageRepository = RepositoryProvider.storageRepository,
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : ViewModel() {
 

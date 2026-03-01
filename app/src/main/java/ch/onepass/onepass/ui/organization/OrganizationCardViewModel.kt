@@ -3,7 +3,8 @@ package ch.onepass.onepass.ui.organization
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.organization.Organization
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
+import ch.onepass.onepass.model.organization.OrganizationRepository
+import ch.onepass.onepass.repository.RepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -17,7 +18,7 @@ data class OrganizerCardUiState(
 )
 
 open class OrganizerCardViewModel(
-    private val repo: OrganizationRepositoryFirebase = OrganizationRepositoryFirebase()
+    private val repo: OrganizationRepository = RepositoryProvider.organizationRepository
 ) : ViewModel() {
 
   private val _ui = MutableStateFlow(OrganizerCardUiState())

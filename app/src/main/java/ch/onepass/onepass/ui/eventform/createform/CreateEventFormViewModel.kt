@@ -3,15 +3,12 @@ package ch.onepass.onepass.ui.eventform.createform
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.event.Event
 import ch.onepass.onepass.model.event.EventRepository
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
 import ch.onepass.onepass.model.event.EventStatus
 import ch.onepass.onepass.model.event.PricingTier
 import ch.onepass.onepass.model.map.LocationRepository
-import ch.onepass.onepass.model.map.NominatimLocationRepository
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.storage.StorageRepository
-import ch.onepass.onepass.model.storage.StorageRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.ui.eventform.EventFormViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,10 +21,10 @@ import kotlinx.coroutines.launch
  * creation logic.
  */
 open class CreateEventFormViewModel(
-    eventRepository: EventRepository = EventRepositoryFirebase(),
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    locationRepository: LocationRepository = NominatimLocationRepository(),
-    storageRepository: StorageRepository = StorageRepositoryFirebase()
+    eventRepository: EventRepository = RepositoryProvider.eventRepository,
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    locationRepository: LocationRepository = RepositoryProvider.locationRepository,
+    storageRepository: StorageRepository = RepositoryProvider.storageRepository
 ) : EventFormViewModel(eventRepository, locationRepository, storageRepository) {
 
   // UI state

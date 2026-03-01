@@ -341,6 +341,7 @@ input UpdateMemberRoleInput {
 extend type Query {
   organization(id: ID!): Organization
   myOrganizations: [Organization!]!
+  myMemberships: [Membership!]!
   searchOrganizations(query: String!, limit: Int): [Organization!]!
   organizationInvitations(organizationId: ID): [OrganizationInvitation!]!
   myInvitations: [OrganizationInvitation!]!

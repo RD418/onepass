@@ -28,11 +28,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import ch.onepass.onepass.model.event.EventRepositoryFirebase
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.pass.PassRepositoryFirebase
 import ch.onepass.onepass.model.scan.TicketScanRepositoryFirebase
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.ui.auth.AuthScreen
 import ch.onepass.onepass.ui.auth.AuthViewModel
 import ch.onepass.onepass.ui.eventdetail.EventDetailScreen
@@ -181,9 +179,9 @@ fun AppNavHost(
                     viewModel(
                         factory =
                             GlobalSearchViewModel.Factory(
-                                userRepo = UserRepositoryFirebase(),
-                                eventRepo = EventRepositoryFirebase(),
-                                orgRepo = OrganizationRepositoryFirebase())))
+                                userRepo = RepositoryProvider.userRepository,
+                                eventRepo = RepositoryProvider.eventRepository,
+                                orgRepo = RepositoryProvider.organizationRepository)))
           }
     }
 

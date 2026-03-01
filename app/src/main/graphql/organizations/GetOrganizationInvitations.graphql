@@ -1,0 +1,13 @@
+query GetOrganizationInvitations($organizationId: ID) {
+  organizationInvitations(organizationId: $organizationId) {
+    id
+    orgId
+    inviteeEmail
+    role
+    invitedBy
+    status
+    createdAt
+    updatedAt
+    expiresAt
+  }
+}

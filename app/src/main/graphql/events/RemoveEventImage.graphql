@@ -1,0 +1,6 @@
+mutation RemoveEventImage($eventId: ID!, $imageUrl: String!) {
+  removeEventImage(eventId: $eventId, imageUrl: $imageUrl) {
+    id
+    images
+  }
+}

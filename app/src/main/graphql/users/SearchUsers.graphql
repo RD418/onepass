@@ -1,0 +1,8 @@
+query SearchUsers($query: String!, $limit: Int) {
+  searchUsers(query: $query, limit: $limit) {
+    uid
+    email
+    displayName
+    avatarUrl
+  }
+}

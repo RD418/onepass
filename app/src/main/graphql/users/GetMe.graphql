@@ -1,0 +1,17 @@
+query GetMe {
+  me {
+    uid
+    email
+    displayName
+    bio
+    avatarUrl
+    coverUrl
+    phoneE164
+    country
+    status
+    showEmail
+    analyticsEnabled
+    createdAt
+    lastLoginAt
+  }
+}

@@ -1,0 +1,10 @@
+mutation CreatePost($organizationId: ID!, $title: String!, $content: String!, $imageUrl: String) {
+  createPost(
+    organizationId: $organizationId
+    title: $title
+    content: $content
+    imageUrl: $imageUrl
+  ) {
+    id
+  }
+}

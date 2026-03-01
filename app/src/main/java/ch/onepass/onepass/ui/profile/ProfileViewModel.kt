@@ -3,16 +3,13 @@ package ch.onepass.onepass.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ch.onepass.onepass.model.membership.MembershipRepository
-import ch.onepass.onepass.model.membership.MembershipRepositoryFirebase
 import ch.onepass.onepass.model.organization.InvitationStatus
 import ch.onepass.onepass.model.organization.OrganizationRepository
-import ch.onepass.onepass.model.organization.OrganizationRepositoryFirebase
 import ch.onepass.onepass.model.ticket.TicketRepository
-import ch.onepass.onepass.model.ticket.TicketRepositoryFirebase
 import ch.onepass.onepass.model.ticket.computeUiStatus
 import ch.onepass.onepass.model.user.User
 import ch.onepass.onepass.model.user.UserRepository
-import ch.onepass.onepass.model.user.UserRepositoryFirebase
+import ch.onepass.onepass.repository.RepositoryProvider
 import ch.onepass.onepass.ui.myevents.TicketStatus
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,10 +60,10 @@ sealed interface ProfileEffect {
 }
 
 open class ProfileViewModel(
-    private val userRepository: UserRepository = UserRepositoryFirebase(),
-    private val membershipRepository: MembershipRepository = MembershipRepositoryFirebase(),
-    private val organizationRepository: OrganizationRepository = OrganizationRepositoryFirebase(),
-    private val ticketRepository: TicketRepository = TicketRepositoryFirebase()
+    private val userRepository: UserRepository = RepositoryProvider.userRepository,
+    private val membershipRepository: MembershipRepository = RepositoryProvider.membershipRepository,
+    private val organizationRepository: OrganizationRepository = RepositoryProvider.organizationRepository,
+    private val ticketRepository: TicketRepository = RepositoryProvider.ticketRepository
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(ProfileUiState())
